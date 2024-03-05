@@ -3,14 +3,13 @@ name: Code Coverage Assessment
 # parallelised code. Also regenerates coverage badge.
 
 on:
-  pull-request:
+  pull_request:
     branches:
       - "**"
 
 jobs:
   coverage-badge:
     name: Update coverage badge
-    if: github.event_name == 'push'
     # Update coverage on merge to main via a new pull request to ensure that badge on
     # main is always up to date. Otherwise, it is possible that the badge generated on a
     # feature branch will cease to be valid once a merge takes place. A maintainer will
