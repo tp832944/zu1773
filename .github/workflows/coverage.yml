@@ -142,4 +142,5 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
+          gh pr review -a
           gh pr merge -d --admin -m
