@@ -3,9 +3,9 @@ name: Code Coverage Assessment
 # parallelised code. Also regenerates coverage badge.
 
 on:
-  push:
+  pull-request:
     branches:
-      - main
+      - "**"
 
 jobs:
   coverage-badge:
