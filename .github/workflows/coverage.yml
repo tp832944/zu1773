@@ -22,17 +22,24 @@ jobs:
       # unless someone has interfered. Also, want PR to be ready for approval as
       # quickly as possible, so use generic GITHUB_TOKEN, which will not trigger
       # follow-on workflows.
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.AUTH_APP }}
+          private-key: ${{ secrets.AUTH_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           ref: main
       - name: Create or checkout update branch
         id: create_branch
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           export pr_number=$( gh pr view ${{ env.update_branch }} --json number --jq '.number' )
           export pr_state=$( gh pr view ${{ env.update_branch }} --json state --jq '.state' )
@@ -99,6 +106,8 @@ jobs:
       # Commit authoring and pull-request creation/updating
       - name: Commit badge config if changed
         if: steps.old_file.outputs.hash != steps.new_file.outputs.hash
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           git checkout -m ${{ env.update_branch }}
           export message="chore: update coverage badge"
@@ -111,6 +120,8 @@ jobs:
             --field sha="$sha"
       - name: Create or update pull request
         if: steps.commit.conclusion == 'success' || ( steps.main_file.outputs.hash != steps.new_file.outputs.hash )
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run : |
           export title="chore: update coverage badge"
           export body="Change coverage in badge to ${{ steps.cov.outputs.percentage }}%"
@@ -128,5 +139,7 @@ jobs:
           fi
       - name: Merge
         if: steps.commit.conclusion == 'success' || ( steps.main_file.outputs.hash != steps.new_file.outputs.hash )
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           gh pr merge -d
