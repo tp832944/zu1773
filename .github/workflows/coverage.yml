@@ -124,7 +124,7 @@ jobs:
               --field body="$body"
           else
             # If a PR doesn't already exist, and no previous PR can be reopened, create a new PR.
-            gh pr create -t "$title" -b "$body" -l dependencies -B main -H ${{ env.update_branch }}
+            gh pr create -t "$title" -b "$body" -B main -H ${{ env.update_branch }}
           fi
       - name: Merge
         if: steps.commit.conclusion == 'success' || ( steps.main_file.outputs.hash != steps.new_file.outputs.hash )
